@@ -49,11 +49,11 @@ class CategoryUrlRewrites extends AbstractCatalogUrlRewrites
         $pathId = $extraAttributes['url_path'];
 
         $sql = "
-SELECT main.`value`, min(main.row_id) as master_entity_id, path.value as path_value, COUNT(*) as c 
+SELECT main.`value`, min(main.entity_id) as master_entity_id, path.value as path_value, COUNT(*) as c 
 FROM {$this->_resource->getTableName($this->_tableName)}  main
 LEFT JOIN {$this->_resource->getTableName('catalog_category_entity_varchar')} path
 ON 
-      path.row_id = main.row_id
+      path.entity_id = main.entity_id
   AND path.attribute_id = '{$pathId}'
   AND path.store_id ='{$storeId}'
 where main.attribute_id = '{$attributeId}'
@@ -96,14 +96,14 @@ GROUP BY main.value, IFNULL(path.value,''), main.store_id HAVING c > 1;
 UPDATE {$tableName} main 
  LEFT JOIN {$this->_resource->getTableName('catalog_category_entity_varchar')} path
  ON 
-        path.row_id = main.row_id 
+        path.entity_id = main.entity_id 
     AND path.attribute_id = '{$pathId}'
     AND path.store_id = '{$storeId}'
- SET main.`value` = CONCAT(main.`value`, '-', main.row_id) 
+ SET main.`value` = CONCAT(main.`value`, '-', main.entity_id) 
 WHERE 
 main.attribute_id = '{$attributeId}' 
 AND main.store_id = '{$storeId}' 
-AND main.row_id <> $masterEntityId
+AND main.entity_id <> $masterEntityId
 AND main.`value` IS NOT NULL 
 AND main.`value` = '{$entityValue}' 
 AND $pathComponent 
@@ -172,29 +172,29 @@ INNER JOIN {$this->_resource->getTableName($this->_tableName)} rootUrl
 	on 
 			leafUrl.value = rootUrl.value 
         AND leafUrl.attribute_id = rootUrl.attribute_id 
-        AND rootUrl.row_id <> leafUrl.row_id
+        AND rootUrl.entity_id <> leafUrl.entity_id
         AND rootUrl.store_id = 0
         
 LEFT JOIN {$this->_resource->getTableName($this->_tableName)} subRootUrl
 	on 
-			subRootUrl.row_id = rootUrl.row_id
+			subRootUrl.entity_id = rootUrl.entity_id
         AND leafUrl.attribute_id = subRootUrl.attribute_id 
         AND subRootUrl.store_id = '{$storeId}'
         
 LEFT JOIN {$this->_resource->getTableName('catalog_category_entity_varchar')} leafPath
   ON 
-          leafPath.row_id = leafUrl.row_id 
+          leafPath.entity_id = leafUrl.entity_id 
       AND leafPath.attribute_id = '{$pathId}'
       AND leafPath.store_id = '{$storeId}'        
         
 LEFT JOIN {$this->_resource->getTableName('catalog_category_entity_varchar')} rootPath
   On 
-          rootUrl.row_id = rootPath.row_id
+          rootUrl.entity_id = rootPath.entity_id
       AND leafPath.attribute_id = '{$pathId}'
       AND rootPath.value = leafPath.value
       AND rootPath.store_id = 0
 
-set leafUrl.`value` = CONCAT(leafUrl.`value`, '-', leafUrl.row_id)
+set leafUrl.`value` = CONCAT(leafUrl.`value`, '-', leafUrl.entity_id)
 
 WHERE leafUrl.attribute_id = '{$attributeId}' AND leafUrl.store_id = '{$storeId}' 
 AND leafPath.value = rootPath.value

@@ -268,7 +268,7 @@ class AbstractCatalogUrlRewrites extends Command
     public function getUrlAttributeUpdates($attributeId, $storeId)
     {
         $sql = "
-SELECT `value`, min(row_id) as master_entity_id, COUNT(*) as c 
+SELECT `value`, min(entity_id) as master_entity_id, COUNT(*) as c 
 FROM {$this->_resource->getTableName($this->_tableName)} 
 where attribute_id = '{$attributeId}'
 and store_id = '{$storeId}'
@@ -300,8 +300,8 @@ GROUP BY value, store_id HAVING c > 1;
         $tableName = $this->_resource->getTableName($this->_tableName);
 
         $sql = "
-UPDATE {$tableName} SET `value` = CONCAT(`value`, '-', row_id) 
-WHERE attribute_id = '{$attributeId}' AND store_id = '{$storeId}' AND row_id <> $masterEntityId
+UPDATE {$tableName} SET `value` = CONCAT(`value`, '-', entity_id) 
+WHERE attribute_id = '{$attributeId}' AND store_id = '{$storeId}' AND entity_id <> $masterEntityId
 AND `value` IS NOT NULL AND `value` = '{$entityValue}'
 ";
         $this->_resource->getConnection()->query($sql);
@@ -361,16 +361,16 @@ INNER JOIN {$this->_resource->getTableName($this->_tableName)} rootUrl
 	on 
 			leafUrl.value = rootUrl.value 
         AND leafUrl.attribute_id = rootUrl.attribute_id 
-        AND rootUrl.row_id <> leafUrl.row_id
+        AND rootUrl.entity_id <> leafUrl.entity_id
         AND rootUrl.store_id = 0
         
 LEFT JOIN {$this->_resource->getTableName($this->_tableName)} subRootUrl
 	on 
-			subRootUrl.row_id = rootUrl.row_id
+			subRootUrl.entity_id = rootUrl.entity_id
         AND leafUrl.attribute_id = subRootUrl.attribute_id 
         AND subRootUrl.store_id = '{$storeId}'        
 
-set leafUrl.`value` = CONCAT(leafUrl.`value`, '-', leafUrl.row_id)
+set leafUrl.`value` = CONCAT(leafUrl.`value`, '-', leafUrl.entity_id)
 
 WHERE 
 leafUrl.attribute_id = '{$attributeId}' 
