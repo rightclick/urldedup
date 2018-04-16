@@ -196,8 +196,8 @@ class AbstractCatalogUrlRewrites extends Command
 
         $output->writeln('');
 
-        $output->writeln('Reindexing: php bin/magento indexer:reindex');
-        shell_exec('php bin/magento indexer:reindex');
+        //$output->writeln('Reindexing: php bin/magento indexer:reindex');
+        //shell_exec('php bin/magento indexer:reindex');
 
         $output->writeln('Refreshing Cache: php bin/magento cache:clean && php bin/magento cache:flush');
         shell_exec('php bin/magento cache:clean');
